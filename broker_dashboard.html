@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broker Dashboard - AI Sales Intelligence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            color: #1a202c;
+        }
+
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #2d3748;
+            color: white;
+            padding: 20px 0;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .logo h2 {
+            font-size: 20px;
+            color: #63b3ed;
+        }
+
+        .nav-menu {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: #4a5568;
+        }
+
+        .nav-item.active {
+            background: #4f46e5;
+            border-right: 3px solid #63b3ed;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-change.positive {
+            color: #38a169;
+        }
+
+        .stat-change.negative {
+            color: #e53e3e;
+        }
+
+        /* Tables */
+        .data-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .table-content {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-scheduled {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .status-confirmed {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .status-completed {
+            background: #d6f5d6;
+            color: #2f855a;
+        }
+
+        .status-cancelled {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .status-pending {
+            background: #faf089;
+            color: #744210;
+        }
+
+        .priority-high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .priority-medium {
+            background: #faf089;
+            color: #744210;
+        }
+
+        .priority-normal {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        /* AI Insights Panel */
+        .ai-insights {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .ai-insights h3 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .insight-item {
+            background: rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .insight-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Customer Profile Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #a0aec0;
+        }
+
+        .profile-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #2d3748;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .conversation-item {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .conversation-time {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .conversation-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .bot-message {
+            background: #bee3f8;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+            
+            .content-area {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>🏢 BrokerAI</h2>
+                <p>Sales Intelligence</p>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="showTab('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="showTab('appointments')">
+                    <span class="nav-icon">📅</span>
+                    <span>Appointments</span>
+                </div>
+                <div class="nav-item" onclick="showTab('customers')">
+                    <span class="nav-icon">👥</span>
+                    <span>Customers</span>
+                </div>
+                <div class="nav-item" onclick="showTab('analytics')">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" onclick="showTab('insights')">
+                    <span class="nav-icon">🧠</span>
+                    <span>AI Insights</span>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar">AI</div>
+                    <div>
+                        <div style="font-weight: 600;">Universal Dashboard</div>
+                        <div style="font-size: 12px; color: #718096;">All Brokers</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Dashboard Tab -->
+                <div id="dashboard-tab" class="tab-content">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Total Customers</span>
+                                <div class="stat-icon" style="background: #e2e8f0; color: #4f46e5;">👥</div>
+                            </div>
+                            <div class="stat-value" id="totalCustomers">-</div>
+                            <div class="stat-change positive">Active conversations</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Total Appointments</span>
+                                <div class="stat-icon" style="background: #fef2e2; color: #f59e0b;">📅</div>
+                            </div>
+                            <div class="stat-value" id="totalAppointments">-</div>
+                            <div class="stat-change positive">All time bookings</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Recent Activity</span>
+                                <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">💬</div>
+                            </div>
+                            <div class="stat-value" id="recentMessages">-</div>
+                            <div class="stat-change positive">Messages today</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">System Status</span>
+                                <div class="stat-icon" style="background: #fce7f3; color: #db2777;">🔧</div>
+                            </div>
+                            <div class="stat-value" id="systemStatus">Online</div>
+                            <div class="stat-change positive">All services active</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights -->
+                    <div class="ai-insights">
+                        <h3>🧠 AI Sales Insights</h3>
+                        <div id="aiInsightsContainer">
+                            <div class="insight-item">
+                                <div class="insight-title">System Analysis</div>
+                                <div class="insight-description">Loading real-time insights from customer interactions...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">Recent Customer Activity</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+                                <button class="btn btn-primary" onclick="showTab('customers')">View All Customers</button>
+                            </div>
+                        </div>
+                        <div class="table-content">
+                            <div id="recentActivityLoading" class="loading">Loading recent activity...</div>
+                            <table id="recentActivityTable" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Last Activity</th>
+                                        <th>Conversations</th>
+                                        <th>Lead Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentActivityTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div id="appointments-tab" class="tab-content" style="display: none;">
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">All Appointments</h3>
+                            <div class="table-actions">
+                                <button class="btn btn-secondary" onclick="refreshAppointments()">🔄 Refresh</button>
+                                <select id="statusFilter" onchange="filterAppointments()">
+                                    <option value="">All Statuses</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-content">
+                            <div id="appointmentsLoading" class="loading">Loading appointments...</div>
+                            <table id="appointmentsTable" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Customer</th>
+                                        <th>Contact</th>
+                                        <th>Property</th>
+                                        <th>Type</th>
+                                        <th>Assigned Broker</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="appointmentsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customers Tab -->
+                <div id="customers-tab" class="tab-content" style="display: none;">
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">Customer Database</h3>
+                            <div class="table-actions">
+                                <input type="text" id="customerSearch" placeholder="Search customers..." 
+                                       style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-right: 12px;"
+                                       oninput="searchCustomers()">
+                                <button class="btn btn-secondary" onclick="exportCustomers()">📊 Export</button>
+                                <button class="btn btn-primary" onclick="refreshCustomers()">🔄 Refresh</button>
+                            </div>
+                        </div>
+                        <div class="table-content">
+                            <div id="customersLoading" class="loading">Loading customers...</div>
+                            <table id="customersTable" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Company</th>
+                                        <th>Preferences</th>
+                                        <th>Conversations</th>
+                                        <th>Lead Score</th>
+                                        <th>Last Contact</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div id="analytics-tab" class="tab-content" style="display: none;">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Conversion Rate</span>
+                                <div class="stat-icon" style="background: #e2e8f0; color: #4f46e5;">📊</div>
+                            </div>
+                            <div class="stat-value" id="conversionRate">-</div>
+                            <div class="stat-change">Appointments to customers</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Response Time</span>
+                                <div class="stat-icon" style="background: #fef2e2; color: #f59e0b;">⚡</div>
+                            </div>
+                            <div class="stat-value" id="avgResponseTime">-</div>
+                            <div class="stat-change">Average response time</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Popular Properties</span>
+                                <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">🏢</div>
+                            </div>
+                            <div class="stat-value" id="popularProperties">-</div>
+                            <div class="stat-change">Most requested type</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Engagement</span>
+                                <div class="stat-icon" style="background: #fce7f3; color: #db2777;">💬</div>
+                            </div>
+                            <div class="stat-value" id="engagementScore">-</div>
+                            <div class="stat-change">Customer engagement level</div>
+                        </div>
+                    </div>
+
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">Customer Interaction Analysis</h3>
+                        </div>
+                        <div class="table-content">
+                            <div id="analyticsContent" class="loading">Loading analytics...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights Tab -->
+                <div id="insights-tab" class="tab-content" style="display: none;">
+                    <div class="ai-insights">
+                        <h3>🧠 Advanced AI Insights</h3>
+                        <div id="advancedInsightsContainer">
+                            <div class="insight-item">
+                                <div class="insight-title">Loading AI Analysis</div>
+                                <div class="insight-description">Analyzing customer behavior patterns and sales opportunities...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">AI Recommendations</h3>
+                        </div>
+                        <div class="table-content">
+                            <div id="recommendationsContent" class="loading">Generating AI recommendations...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Profile Modal -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customer Profile & AI Analysis</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <div id="customerProfileContent">
+                <!-- Profile content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let allCustomers = [];
+        let allAppointments = [];
+        let filteredAppointments = [];
+        
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Add active class to clicked nav item
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'appointments': 'All Appointments',
+                'customers': 'Customer Database',
+                'analytics': 'Analytics',
+                'insights': 'AI Insights'
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName];
+            
+            // Load tab-specific data
+            loadTabData(tabName);
+        }
+        
+        // Load data for specific tabs
+        async function loadTabData(tabName) {
+            switch(tabName) {
+                case 'dashboard':
+                    await loadDashboardData();
+                    break;
+                case 'customers':
+                    await loadCustomers();
+                    break;
+                case 'appointments':
+                    await loadAllAppointments();
+                    break;
+                case 'analytics':
+                    await loadAnalytics();
+                    break;
+                case 'insights':
+                    await loadAIInsights();
+                    break;
+            }
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load customers
+                const customersResponse = await fetch(`${API_BASE}/crm/users`);
+                const customersData = await customersResponse.json();
+                allCustomers = customersData.users || [];
+                
+                // Load system health
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const healthData = await healthResponse.json();
+                
+                // Update stats
+                document.getElementById('totalCustomers').textContent = allCustomers.length;
+                document.getElementById('systemStatus').textContent = healthData.status || 'Online';
+                
+                // Calculate recent messages (last 24 hours)
+                let recentMessageCount = 0;
+                const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                
+                for (const customer of allCustomers) {
+                    try {
+                        const convResponse = await fetch(`${API_BASE}/crm/conversations/${customer.user_id}`);
+                        if (convResponse.ok) {
+                            const convData = await convResponse.json();
+                            const recentMessages = convData.conversations.filter(conv => 
+                                new Date(conv.timestamp) > oneDayAgo
+                            );
+                            recentMessageCount += recentMessages.length;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching conversations for', customer.user_id, error);
+                    }
+                }
+                
+                document.getElementById('recentMessages').textContent = recentMessageCount;
+                
+                // Load recent activity
+                await loadRecentActivity();
+                
+                // Generate AI insights
+                generateDashboardInsights();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+        
+        // Load recent activity for dashboard
+        async function loadRecentActivity() {
+            try {
+                const tableBody = document.getElementById('recentActivityTableBody');
+                const loading = document.getElementById('recentActivityLoading');
+                const table = document.getElementById('recentActivityTable');
+                
+                tableBody.innerHTML = '';
+                
+                // Sort customers by last activity
+                const customersWithActivity = [];
+                
+                for (const customer of allCustomers.slice(0, 10)) { // Limit to 10 for performance
+                    try {
+                        const convResponse = await fetch(`${API_BASE}/crm/conversations/${customer.user_id}`);
+                        if (convResponse.ok) {
+                            const convData = await convResponse.json();
+                            if (convData.conversations.length > 0) {
+                                const lastConv = convData.conversations[convData.conversations.length - 1];
+                                customersWithActivity.push({
+                                    ...customer,
+                                    lastActivity: new Date(lastConv.timestamp),
+                                    conversationCount: convData.conversations.length
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching conversations for', customer.user_id, error);
+                    }
+                }
+                
+                // Sort by most recent activity
+                customersWithActivity.sort((a, b) => b.lastActivity - a.lastActivity);
+                
+                customersWithActivity.slice(0, 5).forEach(customer => {
+                    const row = document.createElement('tr');
+                    const leadScore = calculateLeadScore(customer);
+                    
+                    row.innerHTML = `
+                        <td>
+                            <div style="font-weight: 600;">${customer.name || 'Anonymous'}</div>
+                            <div style="font-size: 12px; color: #718096;">${customer.email || 'No email'}</div>
+                        </td>
+                        <td>${formatRelativeTime(customer.lastActivity)}</td>
+                        <td>${customer.conversationCount} messages</td>
+                        <td>
+                            <span class="status-badge ${getLeadScoreClass(leadScore)}">
+                                ${leadScore}/100
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-small" onclick="viewCustomer('${customer.user_id}')">
+                                View Profile
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
+        
+        // Load all appointments from all users
+        async function loadAllAppointments() {
+            try {
+                const loading = document.getElementById('appointmentsLoading');
+                const table = document.getElementById('appointmentsTable');
+                const tableBody = document.getElementById('appointmentsTableBody');
+                
+                loading.style.display = 'block';
+                table.style.display = 'none';
+                tableBody.innerHTML = '';
+                
+                allAppointments = [];
+                
+                // Get appointments for all customers
+                for (const customer of allCustomers) {
+                    try {
+                        const response = await fetch(`${API_BASE}/appointments/user/${customer.user_id}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.appointments && data.appointments.length > 0) {
+                                data.appointments.forEach(appointment => {
+                                    allAppointments.push({
+                                        ...appointment,
+                                        customer_info: customer
+                                    });
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error fetching appointments for ${customer.user_id}:`, error);
+                    }
+                }
+                
+                // Sort appointments by date (most recent first)
+                allAppointments.sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
+                
+                // Update total appointments stat
+                document.getElementById('totalAppointments').textContent = allAppointments.length;
+                
+                // Display appointments
+                filteredAppointments = [...allAppointments];
+                displayAppointments(filteredAppointments);
+                
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                showError('Failed to load appointments');
+            }
+        }
+        
+        // Display appointments in table
+        function displayAppointments(appointments) {
+            const tableBody = document.getElementById('appointmentsTableBody');
+            tableBody.innerHTML = '';
+            
+            if (appointments.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #718096;">
+                            No appointments found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            appointments.forEach(appointment => {
+                const row = document.createElement('tr');
+                const customer = appointment.customer_info;
+                const appointmentDate = new Date(`${appointment.appointment_date}T${appointment.appointment_time || '14:00'}`);
+                
+                // Determine assigned broker/staff
+                let assignedStaff = 'Unassigned';
+                let staffType = 'broker';
+                
+                if (appointment.appointment_type === 'maintenance' || appointment.appointment_type === 'repair') {
+                    assignedStaff = 'Maintenance Team';
+                    staffType = 'maintenance';
+                } else {
+                    assignedStaff = 'Sales Broker';
+                }
+                
+                // Determine priority based on appointment type and notes
+                let priority = 'normal';
+                if (appointment.appointment_type === 'emergency_repair') {
+                    priority = 'high';
+                } else if (appointment.notes && appointment.notes.toLowerCase().includes('urgent')) {
+                    priority = 'medium';
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600;">${appointmentDate.toLocaleDateString()}</div>
+                        <div style="font-size: 12px; color: #718096;">${appointmentDate.toLocaleTimeString()}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${customer.name || appointment.customer_name || 'Unknown'}</div>
+                        <div style="font-size: 12px; color: #718096;">${customer.company || 'No company'}</div>
+                    </td>
+                    <td>
+                        <div style="font-size: 12px;">
+                            ${customer.email || appointment.customer_email || 'No email'}<br>
+                            ${customer.phone || appointment.customer_phone || 'No phone'}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${appointment.property_address || 'No property specified'}">
+                            ${appointment.property_address || 'No property specified'}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${getAppointmentTypeClass(appointment.appointment_type)}">
+                            ${formatAppointmentType(appointment.appointment_type)}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${assignedStaff}</div>
+                        <div style="font-size: 11px; color: #718096;">${staffType}</div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${appointment.status || 'scheduled'}">
+                            ${(appointment.status || 'scheduled').charAt(0).toUpperCase() + (appointment.status || 'scheduled').slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge priority-${priority}">
+                            ${priority.charAt(0).toUpperCase() + priority.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="viewCustomer('${customer.user_id}')">
+                                👤 Profile
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="getAIBrief('${customer.user_id}', '${appointment.appointment_id}')">
+                                🧠 AI Brief
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Filter appointments by status
+        function filterAppointments() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            if (!statusFilter) {
+                filteredAppointments = [...allAppointments];
+            } else {
+                filteredAppointments = allAppointments.filter(apt => 
+                    (apt.status || 'scheduled') === statusFilter
+                );
+            }
+            
+            displayAppointments(filteredAppointments);
+        }
+        
+        // Load customers
+        async function loadCustomers() {
+            try {
+                const loading = document.getElementById('customersLoading');
+                const table = document.getElementById('customersTable');
+                const tableBody = document.getElementById('customersTableBody');
+                
+                loading.style.display = 'block';
+                table.style.display = 'none';
+                
+                const response = await fetch(`${API_BASE}/crm/users`);
+                const data = await response.json();
+                allCustomers = data.users || [];
+                
+                await displayCustomers(allCustomers);
+                
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                
+            } catch (error) {
+                console.error('Error loading customers:', error);
+                showError('Failed to load customers');
+            }
+        }
+        
+        // Display customers in table
+        async function displayCustomers(customers) {
+            const tableBody = document.getElementById('customersTableBody');
+            tableBody.innerHTML = '';
+            
+            for (const customer of customers) {
+                let conversationCount = 0;
+                try {
+                    const convResponse = await fetch(`${API_BASE}/crm/conversations/${customer.user_id}`);
+                    if (convResponse.ok) {
+                        const convData = await convResponse.json();
+                        conversationCount = convData.conversations.length;
+                    }
+                } catch (error) {
+                    console.error('Error fetching conversation count for', customer.user_id);
+                }
+                
+                const row = document.createElement('tr');
+                const preferences = customer.preferences || {};
+                const leadScore = calculateLeadScore(customer);
+                
+                row.innerHTML = `
+                    <td>
+                        <div style="font-weight: 600;">${customer.name || 'Anonymous'}</div>
+                        <div style="font-size: 12px; color: #718096;">${customer.email || 'No email'}</div>
+                    </td>
+                    <td>${customer.company || 'Not specified'}</td>
+                    <td>
+                        <div style="font-size: 12px;">
+                            ${preferences.preferred_size ? `Size: ${preferences.preferred_size} SF<br>` : ''}
+                            ${preferences.preferred_location ? `Location: ${preferences.preferred_location}<br>` : ''}
+                            ${preferences.preferred_amenities ? `Amenities: ${preferences.preferred_amenities.join(', ')}` : ''}
+                            ${Object.keys(preferences).length === 0 ? 'None specified' : ''}
+                        </div>
+                    </td>
+                    <td>${conversationCount} messages</td>
+                    <td>
+                        <span class="status-badge ${getLeadScoreClass(leadScore)}">
+                            ${leadScore}/100
+                        </span>
+                    </td>
+                    <td>${new Date(customer.updated_at || customer.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-primary btn-small" onclick="viewCustomer('${customer.user_id}')">
+                            View Profile
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Search customers
+        function searchCustomers() {
+            const searchTerm = document.getElementById('customerSearch').value.toLowerCase();
+            
+            const filtered = allCustomers.filter(customer => 
+                (customer.name || '').toLowerCase().includes(searchTerm) ||
+                (customer.email || '').toLowerCase().includes(searchTerm) ||
+                (customer.company || '').toLowerCase().includes(searchTerm)
+            );
+            
+            displayCustomers(filtered);
+        }
+        
+        // Load analytics
+        async function loadAnalytics() {
+            try {
+                // Calculate conversion rate
+                const customersWithConversations = allCustomers.filter(customer => {
+                    return customer.total_conversations > 0;
+                });
+                
+                const conversionRate = allAppointments.length > 0 ? 
+                    ((allAppointments.length / customersWithConversations.length) * 100).toFixed(1) + '%' : '0%';
+                
+                document.getElementById('conversionRate').textContent = conversionRate;
+                
+                // Calculate average response time (placeholder)
+                document.getElementById('avgResponseTime').textContent = '2.3s';
+                
+                // Most popular property type
+                const propertyTypes = {};
+                allAppointments.forEach(apt => {
+                    const type = apt.appointment_type || 'site_visit';
+                    propertyTypes[type] = (propertyTypes[type] || 0) + 1;
+                });
+                
+                const mostPopular = Object.keys(propertyTypes).reduce((a, b) => 
+                    propertyTypes[a] > propertyTypes[b] ? a : b, 'site_visit'
+                );
+                
+                document.getElementById('popularProperties').textContent = formatAppointmentType(mostPopular);
+                
+                // Engagement score
+                const totalMessages = allCustomers.reduce((sum, customer) => 
+                    sum + (customer.total_conversations || 0), 0
+                );
+                const avgMessages = allCustomers.length > 0 ? (totalMessages / allCustomers.length).toFixed(1) : 0;
+                
+                document.getElementById('engagementScore').textContent = avgMessages + '/user';
+                
+                // Display detailed analytics
+                displayDetailedAnalytics();
+                
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+        
+        // Display detailed analytics
+        function displayDetailedAnalytics() {
+            const analyticsContent = document.getElementById('analyticsContent');
+            
+            // Group customers by engagement level
+            const highEngagement = allCustomers.filter(c => (c.total_conversations || 0) >= 10).length;
+            const mediumEngagement = allCustomers.filter(c => (c.total_conversations || 0) >= 5 && (c.total_conversations || 0) < 10).length;
+            const lowEngagement = allCustomers.filter(c => (c.total_conversations || 0) < 5).length;
+            
+            analyticsContent.innerHTML = `
+                <div style="padding: 20px;">
+                    <h4>Customer Engagement Distribution</h4>
+                    <div style="margin: 20px 0;">
+                        <div style="margin-bottom: 10px;">
+                            <strong>High Engagement (10+ messages):</strong> ${highEngagement} customers
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Medium Engagement (5-9 messages):</strong> ${mediumEngagement} customers
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Low Engagement (1-4 messages):</strong> ${lowEngagement} customers
+                        </div>
+                    </div>
+                    
+                    <h4>Appointment Analysis</h4>
+                    <div style="margin: 20px 0;">
+                        <div style="margin-bottom: 10px;">
+                            <strong>Total Appointments:</strong> ${allAppointments.length}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Scheduled:</strong> ${allAppointments.filter(a => (a.status || 'scheduled') === 'scheduled').length}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Completed:</strong> ${allAppointments.filter(a => a.status === 'completed').length}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Cancelled:</strong> ${allAppointments.filter(a => a.status === 'cancelled').length}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Load AI insights
+        async function loadAIInsights() {
+            try {
+                const insights = generateAdvancedInsights();
+                displayAdvancedInsights(insights);
+                generateRecommendations();
+                
+            } catch (error) {
+                console.error('Error loading AI insights:', error);
+            }
+        }
+        
+        // Generate advanced AI insights
+        function generateAdvancedInsights() {
+            const insights = [];
+            
+            // Customer behavior analysis
+            const totalCustomers = allCustomers.length;
+            const activeCustomers = allCustomers.filter(c => (c.total_conversations || 0) > 0).length;
+            const conversionRate = totalCustomers > 0 ? (allAppointments.length / totalCustomers * 100).toFixed(1) : 0;
+            
+            insights.push({
+                title: "🎯 Customer Acquisition Insights",
+                description: `${activeCustomers}/${totalCustomers} customers have engaged (${(activeCustomers/totalCustomers*100).toFixed(1)}% activation rate). Current appointment conversion rate is ${conversionRate}%.`
+            });
+            
+            // Timing patterns
+            const appointmentHours = allAppointments.map(apt => {
+                if (apt.appointment_time) {
+                    return parseInt(apt.appointment_time.split(':')[0]);
+                }
+                return 14; // Default 2 PM
+            });
+            
+            const popularHour = appointmentHours.reduce((a, b, i, arr) => 
+                arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
+            );
+            
+            insights.push({
+                title: "⏰ Optimal Scheduling Insights",
+                description: `Most appointments are scheduled at ${popularHour}:00. Consider blocking this time for high-priority prospects.`
+            });
+            
+            // Property preferences
+            const siteVisits = allAppointments.filter(a => a.appointment_type === 'site_visit').length;
+            const virtualTours = allAppointments.filter(a => a.appointment_type === 'virtual_tour').length;
+            
+            if (siteVisits > virtualTours) {
+                insights.push({
+                    title: "🏢 Property Viewing Preferences",
+                    description: `${siteVisits} site visits vs ${virtualTours} virtual tours. Customers prefer in-person viewings - ensure properties are show-ready.`
+                });
+            }
+            
+            // Maintenance insights
+            const maintenanceRequests = allAppointments.filter(a => 
+                a.appointment_type === 'maintenance' || a.appointment_type === 'repair'
+            ).length;
+            
+            if (maintenanceRequests > 0) {
+                insights.push({
+                    title: "🔧 Tenant Service Insights",
+                    description: `${maintenanceRequests} maintenance requests received. Strong tenant support drives retention and referrals.`
+                });
+            }
+            
+            return insights;
+        }
+        
+        // Display advanced insights
+        function displayAdvancedInsights(insights) {
+            const container = document.getElementById('advancedInsightsContainer');
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-title">${insight.title}</div>
+                    <div class="insight-description">${insight.description}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Generate AI recommendations
+        function generateRecommendations() {
+            const recommendations = [];
+            
+            // High-value prospects
+            const highValueProspects = allCustomers.filter(c => {
+                const score = calculateLeadScore(c);
+                return score >= 80 && (c.total_conversations || 0) > 5;
+            });
+            
+            if (highValueProspects.length > 0) {
+                recommendations.push({
+                    type: 'high_priority',
+                    title: `🔥 ${highValueProspects.length} High-Value Prospects Ready for Follow-up`,
+                    action: 'Schedule immediate calls with these leads',
+                    customers: highValueProspects.slice(0, 3)
+                });
+            }
+            
+            // Stale leads
+            const staleLeads = allCustomers.filter(c => {
+                const lastUpdate = new Date(c.updated_at || c.created_at);
+                const daysSince = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24);
+                return daysSince > 7 && (c.total_conversations || 0) > 0;
+            });
+            
+            if (staleLeads.length > 0) {
+                recommendations.push({
+                    type: 'follow_up',
+                    title: `📅 ${staleLeads.length} Leads Need Follow-up`,
+                    action: 'Re-engage with market updates or new property alerts',
+                    customers: staleLeads.slice(0, 3)
+                });
+            }
+            
+            // Display recommendations
+            const container = document.getElementById('recommendationsContent');
+            if (recommendations.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #718096;">No immediate recommendations. Keep monitoring customer activity.</div>';
+            } else {
+                container.innerHTML = recommendations.map(rec => `
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 16px;">
+                        <h4 style="color: #2d3748; margin-bottom: 8px;">${rec.title}</h4>
+                        <p style="color: #4a5568; margin-bottom: 12px;">${rec.action}</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${rec.customers.map(customer => `
+                                <button class="btn btn-primary btn-small" onclick="viewCustomer('${customer.user_id}')">
+                                    ${customer.name || customer.email || 'View Customer'}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Generate dashboard insights
+        function generateDashboardInsights() {
+            const insights = [];
+            
+            if (allCustomers.length > 0) {
+                const recentCustomers = allCustomers.filter(c => {
+                    const created = new Date(c.created_at);
+                    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    return created > weekAgo;
+                }).length;
+                
+                if (recentCustomers > 0) {
+                    insights.push({
+                        title: "📈 New Customer Growth",
+                        description: `${recentCustomers} new customers this week. Customer acquisition is trending upward.`
+                    });
+                }
+            }
+            
+            if (allAppointments.length > 0) {
+                const todayAppointments = allAppointments.filter(apt => {
+                    const aptDate = new Date(apt.appointment_date);
+                    const today = new Date();
+                    return aptDate.toDateString() === today.toDateString();
+                }).length;
+                
+                if (todayAppointments > 0) {
+                    insights.push({
+                        title: "📅 Today's Schedule",
+                        description: `${todayAppointments} appointments scheduled for today. Review AI briefs for optimal preparation.`
+                    });
+                }
+            }
+            
+            if (insights.length === 0) {
+                insights.push({
+                    title: "🎯 System Monitoring",
+                    description: "All systems operational. Continue monitoring customer interactions for new opportunities."
+                });
+            }
+            
+            const container = document.getElementById('aiInsightsContainer');
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-title">${insight.title}</div>
+                    <div class="insight-description">${insight.description}</div>
+                </div>
+            `).join('');
+        }
+        
+        // View customer profile with AI analysis
+        async function viewCustomer(userId) {
+            try {
+                // Find customer in allCustomers array
+                const user = allCustomers.find(u => u.user_id === userId);
+                if (!user) {
+                    alert('Customer not found');
+                    return;
+                }
+                
+                // Get conversation history
+                const conversationResponse = await fetch(`${API_BASE}/crm/conversations/${userId}`);
+                let conversationData = { conversations: [] };
+                
+                if (conversationResponse.ok) {
+                    conversationData = await conversationResponse.json();
+                }
+                
+                // Generate AI analysis
+                const aiAnalysis = generateAIAnalysis(user, conversationData.conversations);
+                
+                // Populate modal
+                const modalContent = document.getElementById('customerProfileContent');
+                modalContent.innerHTML = `
+                    <div class="profile-section">
+                        <h4 class="section-title">👤 Customer Information</h4>
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <div class="info-label">Name</div>
+                                <div class="info-value">${user.name || 'Not provided'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">${user.email || 'Not provided'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Company</div>
+                                <div class="info-value">${user.company || 'Not provided'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Phone</div>
+                                <div class="info-value">${user.phone || 'Not provided'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Lead Score</div>
+                                <div class="info-value">${calculateLeadScore(user)}/100</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">First Contact</div>
+                                <div class="info-value">${new Date(user.created_at).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h4 class="section-title">🎯 Customer Preferences</h4>
+                        <div class="profile-info">
+                            ${user.preferences && Object.keys(user.preferences).length > 0 ? 
+                                Object.entries(user.preferences).map(([key, value]) => `
+                                    <div class="info-item">
+                                        <div class="info-label">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                        <div class="info-value">${Array.isArray(value) ? value.join(', ') : value}</div>
+                                    </div>
+                                `).join('') : 
+                                '<div class="info-item"><div class="info-value">No preferences recorded</div></div>'
+                            }
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h4 class="section-title">🧠 AI Sales Intelligence</h4>
+                        <div class="ai-insights">
+                            ${aiAnalysis.insights.map(insight => `
+                                <div class="insight-item">
+                                    <div class="insight-title">${insight.title}</div>
+                                    <div class="insight-description">${insight.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h4 class="section-title">💬 Recent Conversations (${conversationData.conversations.length} messages)</h4>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            ${conversationData.conversations.length > 0 ? 
+                                conversationData.conversations.slice(-5).map(conv => `
+                                    <div class="conversation-item">
+                                        <div class="conversation-time">${new Date(conv.timestamp).toLocaleString()}</div>
+                                        <div class="user-message">
+                                            <strong>Customer:</strong> ${conv.user_message}
+                                        </div>
+                                        <div class="bot-message">
+                                            <strong>AI Assistant:</strong> ${conv.bot_response.substring(0, 200)}${conv.bot_response.length > 200 ? '...' : ''}
+                                        </div>
+                                    </div>
+                                `).join('') :
+                                '<div style="text-align: center; padding: 20px; color: #718096;">No conversations yet</div>'
+                            }
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h4 class="section-title">📋 Recommended Actions</h4>
+                        <div class="table-actions">
+                            <button class="btn btn-primary" onclick="generateAIBrief('${userId}')">🧠 Generate AI Brief</button>
+                            <button class="btn btn-secondary" onclick="sendFollowUp('${userId}')">📧 Send Follow-up</button>
+                            <button class="btn btn-secondary" onclick="scheduleCall('${userId}')">📞 Schedule Call</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Show modal
+                document.getElementById('customerModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error loading customer profile:', error);
+                alert('Error loading customer profile');
+            }
+        }
+        
+        // Utility functions
+        function calculateLeadScore(user) {
+            let score = 20; // Base score
+            
+            if (user.email) score += 15;
+            if (user.company) score += 15;
+            if (user.phone) score += 10;
+            if (user.preferences && Object.keys(user.preferences).length > 0) score += 20;
+            if (user.preferences && user.preferences.budget) score += 20;
+            
+            return Math.min(score, 100);
+        }
+        
+        function getLeadScoreClass(score) {
+            if (score >= 80) return 'status-completed';
+            if (score >= 60) return 'status-scheduled';
+            if (score >= 40) return 'status-pending';
+            return 'status-cancelled';
+        }
+        
+        function getAppointmentTypeClass(type) {
+            const classes = {
+                'site_visit': 'status-scheduled',
+                'virtual_tour': 'status-pending',
+                'consultation': 'status-confirmed',
+                'maintenance': 'priority-medium',
+                'repair': 'priority-high',
+                'emergency_repair': 'priority-high'
+            };
+            return classes[type] || 'status-scheduled';
+        }
+        
+        function formatAppointmentType(type) {
+            const formats = {
+                'site_visit': 'Site Visit',
+                'virtual_tour': 'Virtual Tour',
+                'consultation': 'Consultation',
+                'maintenance': 'Maintenance',
+                'repair': 'Repair',
+                'emergency_repair': 'Emergency Repair'
+            };
+            return formats[type] || type;
+        }
+        
+        function formatRelativeTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 60) return `${minutes} minutes ago`;
+            if (hours < 24) return `${hours} hours ago`;
+            if (days < 7) return `${days} days ago`;
+            return date.toLocaleDateString();
+        }
+        
+        // Generate AI analysis for customer
+        function generateAIAnalysis(user, conversations) {
+            const insights = [];
+            
+            // Analyze conversation sentiment and urgency
+            const recentMessages = conversations.slice(-3);
+            const urgencyKeywords = ['urgent', 'asap', 'immediately', 'soon', 'deadline'];
+            const positiveKeywords = ['interested', 'perfect', 'love', 'great', 'excellent'];
+            const budgetKeywords = ['budget', 'price', 'cost', 'afford', 'expensive'];
+            
+            let urgencyScore = 0;
+            let interestScore = 0;
+            let budgetConcern = false;
+            
+            recentMessages.forEach(msg => {
+                const text = msg.user_message.toLowerCase();
+                urgencyKeywords.forEach(keyword => {
+                    if (text.includes(keyword)) urgencyScore += 1;
+                });
+                positiveKeywords.forEach(keyword => {
+                    if (text.includes(keyword)) interestScore += 1;
+                });
+                budgetKeywords.forEach(keyword => {
+                    if (text.includes(keyword)) budgetConcern = true;
+                });
+            });
+            
+            // Generate insights based on analysis
+            if (urgencyScore > 0) {
+                insights.push({
+                    title: "🚨 High Urgency Detected",
+                    description: "Customer has mentioned urgency in recent conversations. Prioritize immediate follow-up and fast-track property viewings."
+                });
+            }
+            
+            if (interestScore >= 2) {
+                insights.push({
+                    title: "🔥 High Interest Level",
+                    description: "Customer shows strong positive sentiment. They're likely ready to move forward with the right property match."
+                });
+            }
+            
+            if (budgetConcern) {
+                insights.push({
+                    title: "💰 Budget Sensitivity",
+                    description: "Customer has mentioned budget concerns. Focus on value proposition and ROI when presenting properties."
+                });
+            }
+            
+            if (user.preferences && user.preferences.preferred_location) {
+                insights.push({
+                    title: "📍 Location Preference",
+                    description: `Strong preference for ${user.preferences.preferred_location}. Prioritize properties in this area.`
+                });
+            }
+            
+            if (conversations.length > 10) {
+                insights.push({
+                    title: "🎯 Engaged Prospect",
+                    description: "Customer has had multiple conversations showing sustained interest. High conversion probability."
+                });
+            }
+            
+            // Default insight if no specific patterns found
+            if (insights.length === 0) {
+                insights.push({
+                    title: "📊 Standard Follow-up",
+                    description: "Continue nurturing this lead with regular property updates and market insights."
+                });
+            }
+            
+            return { insights };
+        }
+        
+        // Get AI brief for upcoming meeting
+        async function getAIBrief(customerId, appointmentId = null) {
+            try {
+                const customer = allCustomers.find(c => c.user_id === customerId);
+                if (!customer) {
+                    alert('Customer not found');
+                    return;
+                }
+                
+                // Get conversation history
+                const convResponse = await fetch(`${API_BASE}/crm/conversations/${customerId}`);
+                let conversations = [];
+                if (convResponse.ok) {
+                    const convData = await convResponse.json();
+                    conversations = convData.conversations;
+                }
+                
+                // Find appointment if specified
+                let appointment = null;
+                if (appointmentId) {
+                    appointment = allAppointments.find(a => a.appointment_id === appointmentId);
+                }
+                
+                const brief = generateMeetingBrief(customer, conversations, appointment);
+                
+                // Show brief in alert (could be enhanced with a modal)
+                alert(brief);
+                
+            } catch (error) {
+                console.error('Error generating AI brief:', error);
+                alert('Error generating AI brief');
+            }
+        }
+        
+        // Generate meeting brief
+        function generateMeetingBrief(customer, conversations, appointment) {
+            const leadScore = calculateLeadScore(customer);
+            const preferences = customer.preferences || {};
+            
+            let brief = `📋 AI MEETING BRIEF - ${(customer.name || 'CUSTOMER').toUpperCase()}\n\n`;
+            
+            brief += `🎯 CUSTOMER PROFILE:\n`;
+            brief += `• Name: ${customer.name || 'Not provided'}\n`;
+            brief += `• Company: ${customer.company || 'Not provided'}\n`;
+            brief += `• Email: ${customer.email || 'Not provided'}\n`;
+            brief += `• Lead Score: ${leadScore}/100\n`;
+            brief += `• Total Conversations: ${conversations.length}\n\n`;
+            
+            if (Object.keys(preferences).length > 0) {
+                brief += `🏢 PREFERENCES:\n`;
+                Object.entries(preferences).forEach(([key, value]) => {
+                    brief += `• ${key.replace(/_/g, ' ')}: ${Array.isArray(value) ? value.join(', ') : value}\n`;
+                });
+                brief += `\n`;
+            }
+            
+            if (appointment) {
+                brief += `📅 APPOINTMENT DETAILS:\n`;
+                brief += `• Type: ${formatAppointmentType(appointment.appointment_type)}\n`;
+                brief += `• Property: ${appointment.property_address || 'Not specified'}\n`;
+                brief += `• Date: ${appointment.appointment_date} ${appointment.appointment_time || ''}\n`;
+                if (appointment.notes) {
+                    brief += `• Notes: ${appointment.notes}\n`;
+                }
+                brief += `\n`;
+            }
+            
+            // Analyze recent conversations for talking points
+            const recentConversations = conversations.slice(-3);
+            if (recentConversations.length > 0) {
+                brief += `💡 KEY TALKING POINTS:\n`;
+                
+                const mentionedTopics = new Set();
+                recentConversations.forEach(conv => {
+                    const message = conv.user_message.toLowerCase();
+                    if (message.includes('parking')) mentionedTopics.add('Parking availability');
+                    if (message.includes('size') || message.includes('square')) mentionedTopics.add('Space requirements');
+                    if (message.includes('location') || message.includes('downtown')) mentionedTopics.add('Location preferences');
+                    if (message.includes('price') || message.includes('budget')) mentionedTopics.add('Pricing and budget');
+                    if (message.includes('amenity') || message.includes('facility')) mentionedTopics.add('Building amenities');
+                });
+                
+                if (mentionedTopics.size > 0) {
+                    mentionedTopics.forEach(topic => {
+                        brief += `• Discuss ${topic}\n`;
+                    });
+                } else {
+                    brief += `• Focus on customer's business needs\n`;
+                    brief += `• Highlight property features and benefits\n`;
+                    brief += `• Discuss lease terms and flexibility\n`;
+                }
+                brief += `\n`;
+            }
+            
+            brief += `🎯 CONVERSION STRATEGY:\n`;
+            if (leadScore >= 80) {
+                brief += `• HIGH PRIORITY: Ready to close - focus on final objections\n`;
+                brief += `• Prepare lease documentation\n`;
+                brief += `• Discuss immediate move-in timeline\n`;
+            } else if (leadScore >= 60) {
+                brief += `• MEDIUM PRIORITY: Build urgency and address concerns\n`;
+                brief += `• Highlight competitive advantages\n`;
+                brief += `• Provide social proof and testimonials\n`;
+            } else {
+                brief += `• NURTURE LEAD: Focus on relationship building\n`;
+                brief += `• Educate on market conditions\n`;
+                brief += `• Identify decision-making timeline\n`;
+            }
+            
+            brief += `\n📞 RECOMMENDED CLOSE:\n`;
+            brief += `"Based on what we've discussed, this property aligns perfectly with your requirements. `;
+            brief += `Should we move forward with the next steps?"`;
+            
+            return brief;
+        }
+        
+        // Action handlers
+        function generateAIBrief(userId) {
+            getAIBrief(userId);
+        }
+        
+        function sendFollowUp(userId) {
+            const customer = allCustomers.find(c => c.user_id === userId);
+            if (customer) {
+                alert(`Preparing follow-up email for ${customer.name || customer.email}...`);
+                // Here you would integrate with email system
+            }
+        }
+        
+        function scheduleCall(userId) {
+            const customer = allCustomers.find(c => c.user_id === userId);
+            if (customer) {
+                alert(`Scheduling call with ${customer.name || customer.email}...`);
+                // Here you would integrate with calendar system
+            }
+        }
+        
+        function exportCustomers() {
+            // Create CSV content
+            const headers = ['Name', 'Email', 'Company', 'Phone', 'Lead Score', 'Created Date'];
+            const csvContent = [
+                headers.join(','),
+                ...allCustomers.map(customer => [
+                    customer.name || '',
+                    customer.email || '',
+                    customer.company || '',
+                    customer.phone || '',
+                    calculateLeadScore(customer),
+                    new Date(customer.created_at).toLocaleDateString()
+                ].map(field => `"${field}"`).join(','))
+            ].join('\n');
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `customers_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Modal management
+        function closeModal() {
+            document.getElementById('customerModal').classList.remove('active');
+        }
+        
+        // Utility functions
+        function refreshData() {
+            const currentTab = document.querySelector('.nav-item.active').textContent.trim().toLowerCase();
+            loadTabData(currentTab);
+        }
+        
+        function refreshAppointments() {
+            loadAllAppointments();
+        }
+        
+        function refreshCustomers() {
+            loadCustomers();
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            const contentArea = document.querySelector('.content-area');
+            contentArea.insertBefore(errorDiv, contentArea.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Initializing broker dashboard...');
+            
+            try {
+                // Load customers first (needed for other operations)
+                const customersResponse = await fetch(`${API_BASE}/crm/users`);
+                const customersData = await customersResponse.json();
+                allCustomers = customersData.users || [];
+                
+                // Load initial dashboard data
+                await loadTabData('dashboard');
+                
+                console.log(`Dashboard loaded with ${allCustomers.length} customers`);
+                
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                showError('Failed to initialize dashboard. Please refresh the page.');
+            }
+        });
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('customerModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

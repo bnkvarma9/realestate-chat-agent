@@ -1,0 +1,2780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agentic Real Estate AI</title>
+   
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+             flex-shrink: 0;
+            background: #f8f9ff;
+            border-right: 1px solid #e0e7ff;
+            display: flex;
+            min-width: 320px;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #4f46e5;
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-mode-selector {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e7ff;
+            background: #f1f5f9;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: white;
+            border-radius: 25px;
+            padding: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 22px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: transparent;
+            color: #64748b;
+        }
+
+        .mode-btn.active {
+            background: #4f46e5;
+            color: white;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        .voice-controls {
+            display: none;
+            padding: 10px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ff;
+        }
+
+        .voice-controls.active {
+            display: block;
+        }
+
+        .voice-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .voice-btn.recording {
+            background: #dc2626;
+            animation: pulse 1s infinite;
+        }
+
+        .voice-btn.processing {
+            background: #f59e0b;
+            animation: spin 1s linear infinite;
+        }
+
+        .stop-audio-btn {
+            margin-left: 10px;
+            padding: 8px 16px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+
+        .stop-audio-btn.show {
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .voice-status {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .quick-actions {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .quick-actions h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #374151;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .action-btn:hover {
+            border-color: #4f46e5;
+            background: #f9fafb;
+        }
+
+        .system-status {
+            padding: 20px;
+            border-top: 1px solid #e0e7ff;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+
+        .chat-area {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            color: #111827;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 90%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+              word-break: break-word;
+        overflow-wrap: break-word;
+            min-width: 200px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            border: 1px solid #e5e7eb;
+            margin-left: 40px;
+            max-width: calc(100% - 80px);
+        }
+
+        .message.user .message-content {
+            background: #4f46e5;
+            color: white;
+            margin-right: 40px;
+            max-width: calc(100% - 80px);
+        }
+
+        .message.bot::before {
+            content: '🤖';
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            font-size: 20px;
+        }
+
+        .message.user::after {
+            content: '👤';
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            font-size: 20px;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .message.user .message-meta {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .voice-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+        }
+
+        .voice-indicator {
+            width: 20px;
+            height: 20px;
+            background: #4f46e5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .typing-indicator {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .typing-indicator .message-content {
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            margin-left: 40px;
+            max-width: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 22px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.4;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: #4f46e5;
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: #4f46e5;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #4338ca;
+        }
+
+        .send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .notification.error {
+            background: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Property table styles */
+        .property-response {
+            margin: 15px 0;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .property-header {
+            background: #4f46e5;
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .property-count {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .table-container {
+            overflow-x: auto;
+             max-width: 100%;
+        }
+
+   .property-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    table-layout: auto;
+}
+
+        .property-table th {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+            padding: 10px 6px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .property-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .property-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .clickable-contact {
+            color: #2563eb;
+            text-decoration: none;
+            padding: 2px 4px;
+            border-radius: 3px;
+            background: #eff6ff;
+            font-weight: 500;
+            display: inline-block;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 10px;
+            margin: 1px 0;
+        }
+
+        .clickable-contact:hover {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .property-actions {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .property-action-btn {
+            padding: 3px 6px;
+            border: none;
+            border-radius: 3px;
+            font-size: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-schedule {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-schedule:hover {
+            background: #059669;
+        }
+
+        .btn-contact {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-contact:hover {
+            background: #2563eb;
+        }
+
+        .btn-like {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-like:hover {
+            background: #d97706;
+        }
+
+        .btn-liked {
+            background: #dc2626 !important;
+            color: white;
+        }
+
+        .show-more-btn {
+            margin: 10px;
+            padding: 8px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .show-more-btn:hover {
+            background: #4338ca;
+        }
+
+        /* Appointment Modal */
+        .appointment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .appointment-modal.active {
+            display: flex;
+        }
+
+        .appointment-form {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+
+        .appointment-form h3 {
+            color: #1a202c;
+            margin-bottom: 24px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .form-button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-button.primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .form-button.primary:hover {
+            background: #4338ca;
+        }
+
+        .form-button.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .form-button.secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .property-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .property-suggestions.show {
+            display: block;
+        }
+
+        .property-suggestion {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13px;
+        }
+
+        .property-suggestion:hover {
+            background: #f8fafc;
+        }
+
+        .property-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .chat-container {
+                width: 95%;
+                height: 95vh;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .property-table {
+                font-size: 10px;
+            }
+
+            .property-table th,
+            .property-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Real Estate AI</h2>
+                <p>Multi-Agentic Assistant</p>
+                <a  href="http://127.0.0.1:8000/broker">Are you a Broker?</a>
+
+            </div>
+            
+            <!-- Chat Mode Selector -->
+            <div class="chat-mode-selector">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" data-mode="text">💬 Text</button>
+                    <button class="mode-btn" data-mode="voice">🎤 Voice</button>
+                </div>
+            </div>
+
+            <!-- Voice Controls -->
+            <div class="voice-controls" id="voiceControls">
+                <button class="voice-btn" id="voiceBtn">🎤</button>
+                <button class="stop-audio-btn" id="stopAudioBtn">⏹️ Stop Audio</button>
+                <div class="voice-status" id="voiceStatus">Click to start voice chat</div>
+            </div>
+            
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <button type="button" class="action-btn" data-message="Hello! I need help finding office space">
+                    🏢 Find Office Space
+                </button>
+                <button type="button" class="action-btn" data-message="Show me all available properties">
+                    📋 Show All Properties
+                </button>
+                <button type="button" class="action-btn" data-message="I need a property with exactly 18650 sq ft">
+                    📏 Exact Size Search
+                </button>
+                <button type="button" class="action-btn" data-message="What properties do you have under $50,000 annually?">
+                    💰 Budget Properties
+                </button>
+                <button type="button" class="action-btn" data-message="Show me properties with good parking facilities">
+                    🅿️ Properties with Parking
+                </button>
+                <button type="button" class="action-btn" data-message="I represent TechCorp and need 3000+ sq ft space">
+                    🏢 Large Office Spaces
+                </button>
+                <button type="button" class="action-btn" data-message="I am already a tenant and need maintenance help">
+                    🔧 Maintenance Request
+                </button>
+                <button type="button" class="action-btn" data-message="Schedule a repair visit for my current office">
+                    🛠️ Repair Appointment
+                </button>
+                
+                <button type="button" class="action-btn" data-action="appointments">
+                    📅 My Appointments
+                </button>
+                
+                <h3 style="margin-top: 20px;">System Actions</h3>
+                <button type="button" class="action-btn" data-action="health">
+                    🏥 System Health
+                </button>
+                <button type="button" class="action-btn" data-action="clear">
+                    🗑️ Clear Chat
+                </button>
+            </div>
+            
+            <div class="system-status">
+                <h3 style="font-size: 14px; margin-bottom: 10px;">System Status</h3>
+                <div class="status-item">
+                    <div class="status-dot status-online"></div>
+                    <span id="api-status">API: Connected</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot status-warning"></div>
+                    <span id="llm-status">LLM: Fallback Mode</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot status-online"></div>
+                    <span id="rag-status">RAG: Active (225 docs)</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot status-online"></div>
+                    <span id="voice-status-indicator">Voice: Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h1>Multi-Agentic Real Estate Assistant</h1>
+                <p>AI-powered property search with voice support, RAG and CRM integration</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-content">
+                        <div>Welcome to our Multi-Agentic Real Estate AI System! 🏢</div>
+                        <div style="margin-top: 8px;">I can help you:</div>
+                        <div style="margin-top: 4px;">• Find office spaces from our database of 225+ properties</div>
+                        <div>• Search for exact property sizes and requirements</div>
+                        <div>• Connect you with brokers and schedule appointments</div>
+                        <div>• Handle maintenance and repair requests for existing tenants</div>
+                        <div>• Support both text and voice conversations</div>
+                        <div>• Remember your preferences and conversation history</div>
+                        <div style="margin-top: 8px;">You can type or use the voice button to speak with me. How can I assist you today?</div>
+                        <div class="message-meta">System ready • Voice enabled • RAG • CRM active</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-content">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="chat-input-container">
+                    <textarea 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Ask about office spaces, schedule visits, or speak using the voice button..."
+                        rows="1"
+                    ></textarea>
+                    <button type="button" class="send-btn" id="sendBtn">
+                        →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Management Modal -->
+    <div class="appointment-modal" id="appointmentsManagementModal">
+        <div class="appointment-form" style="max-width: 900px;">
+            <h3>📅 My Appointments</h3>
+            
+            <div id="appointmentsListContent">
+                <div class="loading" style="text-align: center; padding: 40px;">
+                    Loading your appointments...
+                </div>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="form-button secondary" onclick="closeAppointmentsModal()">
+                    Close
+                </button>
+                <button type="button" class="form-button primary" onclick="scheduleNewAppointment()">
+                    Schedule New Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Appointment Modal -->
+    <div class="appointment-modal" id="editAppointmentModal">
+        <div class="appointment-form">
+            <h3>✏️ Edit Appointment</h3>
+            
+            <div class="form-group">
+                <label class="form-label" for="editCustomerName">Full Name *</label>
+                <input type="text" id="editCustomerName" class="form-input" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="editCustomerEmail">Email Address *</label>
+                    <input type="email" id="editCustomerEmail" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editCustomerPhone">Phone Number</label>
+                    <input type="tel" id="editCustomerPhone" class="form-input" placeholder="(555) 123-4567">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="editPropertyAddress">Property Address *</label>
+                <input type="text" id="editPropertyAddress" class="form-input" required 
+                       placeholder="Property address..." 
+                       autocomplete="off">
+                <input type="hidden" id="editPropertyId" name="editPropertyId">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="editAppointmentDate">Date *</label>
+                    <input type="date" id="editAppointmentDate" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="editAppointmentTime">Time *</label>
+                    <input type="time" id="editAppointmentTime" class="form-input" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="editAppointmentType">Visit Type</label>
+                <select id="editAppointmentType" class="form-select">
+                    <option value="site_visit">Property Visit</option>
+                    <option value="virtual_tour">Virtual Tour</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="maintenance">Maintenance Visit</option>
+                    <option value="repair">Repair Appointment</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="editAppointmentNotes">Additional Notes</label>
+                <textarea id="editAppointmentNotes" class="form-textarea" rows="3" 
+                          placeholder="Any specific requirements, preferences, or maintenance issues?"></textarea>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="form-button secondary" onclick="closeEditAppointmentModal()">
+                    Cancel
+                </button>
+                <button type="button" class="form-button" style="background: #dc2626; color: white;" onclick="deleteAppointment()">
+                    Delete Appointment
+                </button>
+                <button type="button" class="form-button primary" id="updateAppointmentBtn">
+                    Update Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <!-- Appointment Modal -->
+    <div class="appointment-modal" id="appointmentModal">
+        <div class="appointment-form">
+            <h3>📅 Schedule Property Visit</h3>
+            
+            <div class="form-group">
+                <label class="form-label" for="customerName">Full Name *</label>
+                <input type="text" id="customerName" class="form-input" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="customerEmail">Email Address *</label>
+                    <input type="email" id="customerEmail" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customerPhone">Phone Number</label>
+                    <input type="tel" id="customerPhone" class="form-input" placeholder="(555) 123-4567">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="propertyAddress">Property Address *</label>
+                <input type="text" id="propertyAddress" class="form-input" required 
+                       placeholder="Start typing to search properties..." 
+                       autocomplete="off">
+                <div class="property-suggestions" id="propertySuggestions"></div>
+                <input type="hidden" id="propertyId" name="propertyId">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="appointmentDate">Date *</label>
+                    <input type="date" id="appointmentDate" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="appointmentTime">Time *</label>
+                    <input type="time" id="appointmentTime" class="form-input" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="appointmentType">Visit Type</label>
+                <select id="appointmentType" class="form-select">
+                    <option value="site_visit">Property Visit</option>
+                    <option value="virtual_tour">Virtual Tour</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="maintenance">Maintenance Visit</option>
+                    <option value="repair">Repair Appointment</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="appointmentNotes">Additional Notes</label>
+                <textarea id="appointmentNotes" class="form-textarea" rows="3" 
+                          placeholder="Any specific requirements, preferences, or maintenance issues?"></textarea>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="button" class="form-button secondary" id="cancelAppointmentBtn">
+                    Cancel
+                </button>
+                <button type="button" class="form-button primary" id="submitAppointmentBtn">
+                    Schedule Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        const API_BASE = 'http://localhost:8000';
+        let currentUserId = null;
+        let messageCount = 0;
+        let chatHistory = [];
+        let isVoiceMode = false;
+        let isRecording = false;
+        let isProcessingVoice = false;
+        let voiceRecognition = null;
+        let speechSynthesis = null;
+        let currentUtterance = null;
+        let displayedProperties = [];
+        let totalPropertiesShown = 0;
+        let allAvailableProperties = [];
+        let currentPropertyQuery = '';
+        let modeChangeInProgress = false;
+        let propertyDropdownData = [];
+        let currentEditingAppointment = null;
+
+        // Initialize system
+        function initializeSystem() {
+            console.log('Initializing system...');
+            
+            initializeUserId();
+            initializeVoiceRecognition();
+            loadChatHistory();
+            setupEventListeners();
+            setupTextarea();
+            checkSystemHealth();
+            
+            document.getElementById('chatInput').focus();
+        }
+
+        function initializeUserId() {
+            let storedUserId = localStorage.getItem('aiChatUserId') || sessionStorage.getItem('aiChatUserId');
+            
+            if (storedUserId) {
+                currentUserId = storedUserId;
+                console.log('Using existing user ID:', currentUserId);
+            } else {
+                currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('aiChatUserId', currentUserId);
+                sessionStorage.setItem('aiChatUserId', currentUserId);
+                console.log('Generated new user ID:', currentUserId);
+            }
+        }
+
+        function initializeVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                voiceRecognition = new SpeechRecognition();
+                
+                voiceRecognition.continuous = false;
+                voiceRecognition.interimResults = false;
+                voiceRecognition.lang = 'en-US';
+                voiceRecognition.maxAlternatives = 1;
+                
+                voiceRecognition.onstart = function() {
+                    console.log('Voice recognition started');
+                    isRecording = true;
+                    updateVoiceButton();
+                    updateVoiceStatus('Listening...');
+                };
+                
+                voiceRecognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    console.log('Voice input:', transcript);
+                    
+                    addVoiceMessage(transcript, true);
+                    processVoiceMessage(transcript);
+                };
+                
+                voiceRecognition.onerror = function(event) {
+                    console.error('Voice recognition error:', event.error);
+                    showNotification('Voice recognition error: ' + event.error, true);
+                    isRecording = false;
+                    updateVoiceButton();
+                    updateVoiceStatus('Click to start voice chat');
+                };
+                
+                voiceRecognition.onend = function() {
+                    console.log('Voice recognition ended');
+                    isRecording = false;
+                    updateVoiceButton();
+                    if (!isProcessingVoice) {
+                        updateVoiceStatus('Click to start voice chat');
+                    }
+                };
+                
+                speechSynthesis = window.speechSynthesis;
+                
+                document.getElementById('voice-status-indicator').textContent = 'Voice: Ready';
+                document.querySelector('#voice-status-indicator').previousElementSibling.className = 'status-dot status-online';
+                
+            } else {
+                console.warn('Speech recognition not supported');
+                document.getElementById('voice-status-indicator').textContent = 'Voice: Not Supported';
+                document.querySelector('#voice-status-indicator').previousElementSibling.className = 'status-dot status-error';
+                
+                document.querySelector('.mode-btn[data-mode="voice"]').disabled = true;
+                document.querySelector('.mode-btn[data-mode="voice"]').style.opacity = '0.5';
+            }
+        }
+
+        function setupEventListeners() {
+            // Mode buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    switchMode(this.dataset.mode);
+                });
+            });
+
+            // Voice button
+            document.getElementById('voiceBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleVoiceRecording();
+            });
+
+            // Stop audio button
+            document.getElementById('stopAudioBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                stopAudio();
+            });
+
+            // Quick action buttons
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (this.dataset.message) {
+                        sendQuickMessage(this.dataset.message);
+                    } else if (this.dataset.action === 'health') {
+                        checkHealth();
+                    } else if (this.dataset.action === 'clear') {
+                        clearChat();
+                    } else if (this.dataset.action === 'appointments') {
+                        showAppointmentsModal();
+                    }
+                });
+            });
+
+            // Send button
+            document.getElementById('sendBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                sendMessage();
+            });
+
+            // Appointment modal buttons
+            document.getElementById('cancelAppointmentBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeAppointmentModal();
+            });
+
+            document.getElementById('submitAppointmentBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                submitAppointment();
+            });
+
+            // Edit appointment modal buttons
+            document.getElementById('updateAppointmentBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                updateAppointment();
+            });
+
+            // Global prevention of form submissions
+            document.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.id !== 'chatInput' && e.target.id !== 'appointmentNotes') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            });
+
+            // Click outside modal to close
+            document.getElementById('appointmentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAppointmentModal();
+                }
+            });
+
+            document.getElementById('appointmentsManagementModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAppointmentsModal();
+                }
+            });
+
+            document.getElementById('editAppointmentModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditAppointmentModal();
+                }
+            });
+        }
+
+        function switchMode(mode) {
+            // Prevent auto-switching during voice processing
+            if (modeChangeInProgress) return;
+            
+            // Stop any current audio when switching modes
+            stopAudio();
+            
+            // Preserve mode selection
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
+            
+            isVoiceMode = (mode === 'voice');
+            
+            const voiceControls = document.getElementById('voiceControls');
+            if (isVoiceMode) {
+                voiceControls.classList.add('active');
+                document.getElementById('chatInput').placeholder = 'Voice mode active - click the microphone to speak...';
+            } else {
+                voiceControls.classList.remove('active');
+                document.getElementById('chatInput').placeholder = 'Ask about office spaces, schedule visits, or speak using the voice button...';
+            }
+            
+            console.log('Switched to', mode, 'mode - isVoiceMode:', isVoiceMode);
+        }
+
+        function toggleVoiceRecording() {
+            if (!voiceRecognition) {
+                showNotification('Voice recognition not available', true);
+                return;
+            }
+            
+            if (isRecording) {
+                voiceRecognition.stop();
+            } else {
+                try {
+                    voiceRecognition.start();
+                } catch (error) {
+                    console.error('Failed to start voice recognition:', error);
+                    showNotification('Failed to start voice recognition', true);
+                }
+            }
+        }
+
+        function updateVoiceButton() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            
+            if (isRecording) {
+                voiceBtn.classList.add('recording');
+                voiceBtn.innerHTML = '⏹️';
+            } else if (isProcessingVoice) {
+                voiceBtn.classList.add('processing');
+                voiceBtn.innerHTML = '⏳';
+            } else {
+                voiceBtn.classList.remove('recording', 'processing');
+                voiceBtn.innerHTML = '🎤';
+            }
+        }
+
+        function updateVoiceStatus(status) {
+            document.getElementById('voiceStatus').textContent = status;
+        }
+
+        function addVoiceMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            let messageHTML = `
+                <div class="message-content">
+                    <div class="voice-message">
+                        <div class="voice-indicator">${isUser ? '🎤' : '🔊'}</div>
+                        <div>${content}</div>
+                    </div>
+                    <div class="message-meta">${new Date().toLocaleTimeString()} • Voice</div>
+                </div>
+            `;
+            
+            messageDiv.innerHTML = messageHTML;
+            messagesContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 100);
+        }
+
+        async function processVoiceMessage(transcript) {
+            // Stop any current audio when processing new message
+            stopAudio();
+            
+            modeChangeInProgress = true;
+            isProcessingVoice = true;
+            updateVoiceButton();
+            updateVoiceStatus('Processing...');
+            
+            try {
+                const response = await sendChatMessage(transcript);
+                
+                // Only speak if still in voice mode
+                if (isVoiceMode) {
+                    addVoiceMessage(response, false);
+                    speakText(response);
+                }
+                
+            } catch (error) {
+                console.error('Error processing voice message:', error);
+                showNotification('Error processing voice message', true);
+                
+                const errorMsg = "Sorry, I encountered an error processing your voice message. Please try again.";
+                if (isVoiceMode) {
+                    addVoiceMessage(errorMsg, false);
+                    speakText(errorMsg);
+                }
+            } finally {
+                isProcessingVoice = false;
+                modeChangeInProgress = false;
+                updateVoiceButton();
+                updateVoiceStatus('Click to start voice chat');
+            }
+        }
+
+        function speakText(text) {
+            if (!speechSynthesis) return;
+            
+            // Stop any current speech
+            stopAudio();
+            
+            const cleanText = text
+                .replace(/[|•]/g, ',')
+                .replace(/📧|📞|🏢|📅|🎤|🔊|❤️/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            currentUtterance = new SpeechSynthesisUtterance(cleanText);
+            currentUtterance.lang = 'en-US';
+            currentUtterance.rate = 0.9;
+            currentUtterance.pitch = 1;
+            currentUtterance.volume = 0.8;
+            
+            const voices = speechSynthesis.getVoices();
+            const englishVoice = voices.find(voice => 
+                voice.lang.startsWith('en') && voice.name.includes('Female')
+            ) || voices.find(voice => voice.lang.startsWith('en'));
+            
+            if (englishVoice) {
+                currentUtterance.voice = englishVoice;
+            }
+            
+            currentUtterance.onstart = function() {
+                updateVoiceStatus('Speaking...');
+                document.getElementById('stopAudioBtn').classList.add('show');
+            };
+            
+            currentUtterance.onend = function() {
+                updateVoiceStatus('Click to start voice chat');
+                document.getElementById('stopAudioBtn').classList.remove('show');
+                currentUtterance = null;
+            };
+            
+            speechSynthesis.speak(currentUtterance);
+        }
+
+        function stopAudio() {
+            if (speechSynthesis && speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+            if (currentUtterance) {
+                currentUtterance = null;
+            }
+            document.getElementById('stopAudioBtn').classList.remove('show');
+            updateVoiceStatus('Click to start voice chat');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            input.value = '';
+            input.style.height = 'auto';
+            
+            await sendChatMessage(message);
+        }
+        function sendQuickMessage(message) {
+    if (!message || typeof message !== 'string') {
+        console.warn('Invalid quick message input');
+        return;
+    }
+
+    const chatInput = document.getElementById('chatInput');
+    chatInput.value = message;
+
+    // Optionally show the message in the chat UI before sending
+    sendMessage();  // uses existing sendMessage() logic
+}
+
+        async function sendChatMessage(message) {
+            // Stop any current audio when sending new message
+            stopAudio();
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            if (!isVoiceMode || document.getElementById('chatInput').value) {
+                addMessage(message, true);
+            }
+            
+            showTyping();
+            
+            try {
+                const requestBody = {
+                    message: message,
+                    user_id: currentUserId
+                };
+                
+                console.log('Sending request with user_id:', currentUserId);
+                
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received response:', data);
+                
+                if (data.user_id) {
+                    saveUserId(data.user_id);
+                }
+                
+                // Check if appointment form should be triggered or natural language booking
+                if (data.metadata && data.metadata.trigger_appointment_form) {
+                    hideTyping();
+                    addMessage("I'll help you schedule that appointment right away! Let me open the booking form.", false);
+                    
+                    setTimeout(() => {
+                        openAppointmentModal(data.metadata);
+                    }, 500);
+                    
+                    sendBtn.disabled = false;
+                    if (!isVoiceMode) {
+                        document.getElementById('chatInput').focus();
+                    }
+                    return data.response || "Appointment form opened.";
+                } else if (data.metadata && data.metadata.appointment_scheduled) {
+                    // Natural language appointment was scheduled
+                    hideTyping();
+                    addMessage(data.response, false, data.metadata);
+                    
+                    // Show success notification
+                    showNotification('Appointment successfully scheduled!');
+                    
+                    sendBtn.disabled = false;
+                    if (!isVoiceMode) {
+                        document.getElementById('chatInput').focus();
+                    }
+                    return data.response;
+                }
+                
+                addMessage(data.response, false, data.metadata);
+                
+                if (!isVoiceMode) {
+                    showNotification('Message sent successfully!');
+                }
+                
+                return data.response;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error. Please try again.', false);
+                showNotification('Error sending message', true);
+                return "Sorry, I encountered an error. Please try again.";
+            } finally {
+                hideTyping();
+                sendBtn.disabled = false;
+                // Don't auto-focus if in voice mode to prevent mode switching
+                if (!isVoiceMode && !modeChangeInProgress) {
+                    document.getElementById('chatInput').focus();
+                }
+            }
+        }
+
+        function saveUserId(userId) {
+            if (userId && userId !== currentUserId) {
+                currentUserId = userId;
+                localStorage.setItem('aiChatUserId', userId);
+                sessionStorage.setItem('aiChatUserId', userId);
+                console.log('Saved user ID:', userId);
+            }
+        }
+
+        function addMessage(content, isUser = false, metadata = null) {
+            chatHistory.push({
+                content: content,
+                isUser: isUser,
+                metadata: metadata,
+                timestamp: Date.now()
+            });
+            
+            addMessageToUI(content, isUser, metadata);
+            saveChatHistory();
+        }
+
+        function addMessageToUI(content, isUser = false, metadata = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            if (!messagesContainer) {
+                console.error('Messages container not found!');
+                return;
+            }
+            
+            let processedContent = content;
+            
+            if (!isUser) {
+                const hasPropertyData = content.includes('unique id:') || 
+                                      content.includes('property address:') || 
+                                      content.includes('rent/sf/year:') ||
+                                      (content.includes('commercial properties') && content.includes('|'));
+                
+                if (hasPropertyData) {
+                    currentPropertyQuery = extractQueryFromHistory();
+                    const properties = parsePropertyData(content);
+                    
+                    if (properties.length > 0) {
+                        // Store all properties for pagination
+                        allAvailableProperties = properties;
+                        
+                        let beforeText = '';
+                        let afterText = '';
+                        
+                        if (content.includes('Here are the available commercial properties:')) {
+                            const parts = content.split('Here are the available commercial properties:');
+                            beforeText = parts[0] + 'Here are the available commercial properties:';
+                            afterText = parts[1] ? parts[1].split(/\d+\.\s*unique id:/)[0] : '';
+                        } else if (content.includes('1. unique id:')) {
+                            const parts = content.split('1. unique id:');
+                            beforeText = parts[0];
+                        }
+                        
+                        beforeText = beforeText.replace(/\d+\.\s*unique id:.*$/gm, '').trim();
+                        afterText = afterText.replace(/^.*unique id:.*$/gm, '').trim();
+                        
+                        processedContent = '';
+                        if (beforeText) {
+                            processedContent += beforeText + '<br><br>';
+                        }
+                        
+                        // Show first 10 properties
+                        const propertiesToShow = properties.slice(0, 10);
+                        displayedProperties = propertiesToShow;
+                        totalPropertiesShown = propertiesToShow.length;
+                        
+                        processedContent += createPropertyTable(propertiesToShow, properties.length);
+                        
+                        if (afterText) {
+                            processedContent += '<br><br>' + afterText;
+                        }
+                    }
+                }
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            let messageHTML = `<div class="message-content">${processedContent}`;
+            
+            if (metadata && !isUser) {
+                if (metadata.response_time) {
+                    messageHTML += `<div class="message-meta">Response time: ${metadata.response_time.toFixed(2)}s`;
+                    if (metadata.rag_sources > 0) {
+                        messageHTML += ` • RAG sources: ${metadata.rag_sources}`;
+                    }
+                    if (metadata.user_info_extracted) {
+                        messageHTML += ` • User info extracted`;
+                    }
+                    messageHTML += `</div>`;
+                }
+            } else {
+                messageHTML += `<div class="message-meta">${new Date().toLocaleTimeString()}</div>`;
+            }
+            
+            messageHTML += `</div>`;
+            messageDiv.innerHTML = messageHTML;
+            
+            messagesContainer.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 100);
+            
+            messageCount++;
+        }
+
+        function extractQueryFromHistory() {
+            // Get the last user message to understand the query context
+            for (let i = chatHistory.length - 1; i >= 0; i--) {
+                if (chatHistory[i].isUser) {
+                    return chatHistory[i].content.toLowerCase();
+                }
+            }
+            return '';
+        }
+
+        function parsePropertyData(text) {
+            const properties = [];
+            const seenIds = new Set();
+            
+            const pipeFormatProperties = parsePipeFormat(text);
+            const numberedFormatProperties = parseNumberedFormat(text);
+            const allProperties = [...pipeFormatProperties, ...numberedFormatProperties];
+            
+            allProperties.forEach(prop => {
+                if (prop.id && !seenIds.has(prop.id)) {
+                    seenIds.add(prop.id);
+                    properties.push(prop);
+                }
+            });
+            
+            return properties;
+        }
+
+        function parsePipeFormat(text) {
+            const lines = text.split('\n');
+            const properties = [];
+            
+            lines.forEach(line => {
+                if ((line.includes('unique id:') || line.includes('id:')) && 
+                    line.includes('|') && 
+                    (line.includes('property address:') || line.includes('address:')) && 
+                    (line.includes('rent/sf/year:') || line.includes('rent:'))) {
+                    
+                    const parts = line.split('|').map(part => part.trim());
+                    const property = {};
+                    
+                    parts.forEach(part => {
+                        const colonIndex = part.indexOf(':');
+                        if (colonIndex === -1) return;
+                        
+                        const key = part.substring(0, colonIndex).trim().toLowerCase();
+                        const value = part.substring(colonIndex + 1).trim();
+                        
+                        if (key && value && value !== 'n/a' && value !== '') {
+                            if (key.includes('unique id') || key === 'id') {
+                                property.id = value;
+                            } else if (key.includes('property address') || key === 'address') {
+                                property.address = value;
+                            } else if (key === 'floor') {
+                                property.floor = value;
+                            } else if (key === 'suite') {
+                                property.suite = value;
+                            } else if (key.includes('size') || key === 'size (sf)') {
+                                property.size = value;
+                            } else if (key.includes('rent/sf/year') || key.includes('rent')) {
+                                property.rent = value;
+                            } else if (key === 'associate 1') {
+                                property.associate1 = value;
+                            } else if (key === 'associate 2') {
+                                property.associate2 = value;
+                            } else if (key.includes('broker email') || key.includes('email')) {
+                                property.email = value;
+                            } else if (key === 'phone' || key === 'contact') {
+                                property.phone = value;
+                            }
+                        }
+                    });
+                    
+                    if (property.id && property.address) {
+                        properties.push(property);
+                    }
+                }
+            });
+            
+            return properties;
+        }
+
+        function parseNumberedFormat(text) {
+            const lines = text.split('\n');
+            const properties = [];
+            
+            lines.forEach(line => {
+                if (/^\d+\.\s*unique id:/i.test(line) && line.includes('|')) {
+                    const cleanLine = line.replace(/^\d+\.\s*/, '');
+                    const parts = cleanLine.split('|').map(part => part.trim());
+                    const property = {};
+                    
+                    parts.forEach(part => {
+                        const colonIndex = part.indexOf(':');
+                        if (colonIndex === -1) return;
+                        
+                        const key = part.substring(0, colonIndex).trim().toLowerCase();
+                        const value = part.substring(colonIndex + 1).trim();
+                        
+                        if (key && value && value !== 'n/a' && value !== '') {
+                            if (key.includes('unique id') || key === 'id') {
+                                property.id = value;
+                            } else if (key.includes('property address') || key === 'address') {
+                                property.address = value;
+                            } else if (key === 'floor') {
+                                property.floor = value;
+                            } else if (key === 'suite') {
+                                property.suite = value;
+                            } else if (key.includes('size') || key === 'size (sf)') {
+                                property.size = value;
+                            } else if (key.includes('rent/sf/year') || key.includes('rent')) {
+                                property.rent = value;
+                            } else if (key === 'associate 1') {
+                                property.associate1 = value;
+                            } else if (key === 'associate 2') {
+                                property.associate2 = value;
+                            } else if (key.includes('broker email') || key.includes('email')) {
+                                property.email = value;
+                            } else if (key === 'phone' || key === 'contact') {
+                                property.phone = value;
+                            }
+                        }
+                    });
+                    
+                    if (property.id && property.address) {
+                        properties.push(property);
+                    }
+                }
+            });
+            
+            return properties;
+        }
+
+        function createPropertyTable(properties, totalCount) {
+            if (!properties || properties.length === 0) {
+                return '<p>No properties found.</p>';
+            }
+            
+            let tableHTML = `
+                <div class="property-response">
+                    <div class="property-header">
+                        <span>Available Properties</span>
+                        <span class="property-count">Showing ${properties.length} of ${totalCount}</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="property-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Address</th>
+                                    <th>Floor</th>
+                                    <th>Suite</th>
+                                    <th>Size (SF)</th>
+                                    <th>Rent/SF/Year</th>
+                                    <th>Annual Rent</th>
+                                    <th>Monthly Rent</th>
+                                    <th>Associates</th>
+                                    <th>Contact</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            properties.forEach((prop, index) => {
+                const safeId = (prop.id || '').replace(/'/g, "\\'");
+                const safeAddress = (prop.address || '').replace(/'/g, "\\'");
+                
+                tableHTML += `
+                    <tr>
+                        <td><strong>${prop.id || 'N/A'}</strong></td>
+                        <td title="${prop.address || 'N/A'}">${(prop.address || 'N/A').length > 25 ? (prop.address || 'N/A').substring(0, 25) + '...' : (prop.address || 'N/A')}</td>
+                        <td>${prop.floor || 'N/A'}</td>
+                        <td>${prop.suite || 'N/A'}</td>
+                        <td>${prop.size || 'N/A'}</td>
+                        <td>${prop.rent || 'Contact for pricing'}</td>
+                        <td>${prop.annualRent || 'Contact for pricing'}</td>
+                        <td>${prop.monthlyRent || 'Contact for pricing'}</td>
+                        <td>
+                            ${prop.associate1 ? `<div>${prop.associate1}</div>` : ''}
+                            ${prop.associate2 ? `<div>${prop.associate2}</div>` : ''}
+                        </td>
+                        <td>
+                            ${prop.email ? `<a href="#" class="clickable-contact" data-action="email" data-email="${prop.email}" data-address="${safeAddress}" data-id="${safeId}">📧 ${prop.email}</a><br>` : ''}
+                            ${prop.phone ? `<a href="#" class="clickable-contact" data-action="phone" data-phone="${prop.phone}">📞 ${prop.phone}</a>` : 'Contact for details'}
+                        </td>
+                        <td>
+                            <div class="property-actions">
+                                <button class="property-action-btn btn-schedule" data-action="schedule" data-id="${safeId}" data-address="${safeAddress}">📅 Visit</button>
+                                <button class="property-action-btn btn-contact" data-action="contact" data-id="${safeId}" data-address="${safeAddress}">📞 Call</button>
+                                <button class="property-action-btn btn-like" data-action="like" data-id="${safeId}" data-address="${safeAddress}">❤️ Like</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+            `;
+            
+            // Add show more button if there are more properties
+            if (totalPropertiesShown < totalCount) {
+                tableHTML += `
+                    <button class="show-more-btn" data-action="show-more">
+                        Show More Properties (${Math.min(10, totalCount - totalPropertiesShown)} more)
+                    </button>
+                `;
+            }
+            
+            tableHTML += `</div>`;
+            
+            // Add event listeners after table is created
+            setTimeout(() => {
+                addPropertyEventListeners();
+            }, 100);
+            
+            return tableHTML;
+        }
+
+        function addPropertyEventListeners() {
+            // Property action buttons
+            document.querySelectorAll('.property-action-btn').forEach(btn => {
+             btn.onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const action = this.dataset.action;
+    const id = this.dataset.id;
+    const address = this.dataset.address;
+
+    if (action === 'schedule') {
+        schedulePropertyVisit(id, address);
+    } else if (action === 'contact') {
+        contactAboutProperty(id, address);
+    } else if (action === 'like') {
+        likeProperty(this, id, address);
+    }
+};
+
+            });
+
+            // Contact links
+            document.querySelectorAll('.clickable-contact').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const action = this.dataset.action;
+                    
+                    if (action === 'email') {
+                        composeEmail(this.dataset.email, this.dataset.address, this.dataset.id);
+                    } else if (action === 'phone') {
+                        callPhone(this.dataset.phone);
+                    }
+                });
+            });
+
+            // Show more button
+            document.querySelectorAll('.show-more-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showMoreProperties();
+                });
+            });
+        }
+
+        function showMoreProperties() {
+            const nextBatch = allAvailableProperties.slice(totalPropertiesShown, totalPropertiesShown + 10);
+            
+            if (nextBatch.length > 0) {
+                displayedProperties = [...displayedProperties, ...nextBatch];
+                totalPropertiesShown += nextBatch.length;
+                
+                // Update the last property table
+                const lastPropertyResponse = document.querySelector('.property-response:last-of-type');
+                if (lastPropertyResponse) {
+                    lastPropertyResponse.outerHTML = createPropertyTable(displayedProperties, allAvailableProperties.length);
+                }
+                
+                showNotification(`Showing ${nextBatch.length} more properties`);
+            }
+        }
+
+        function schedulePropertyVisit(propertyId, propertyAddress) {
+            console.log('Scheduling visit for property:', propertyId, propertyAddress);
+            
+            // Open appointment modal with pre-filled data
+            openAppointmentModal({
+                property_id: propertyId,
+                property_address: propertyAddress
+            });
+            
+            showNotification(`Opening appointment scheduler for ${propertyAddress}`);
+        }
+
+       function likeProperty(button, propertyId, propertyAddress) {
+    if (button.classList.contains('btn-liked')) return; // prevent duplicate likes
+
+    button.classList.remove('btn-like');
+    button.classList.add('btn-liked');
+    button.innerHTML = '❤️ Liked';
+
+    setTimeout(() => {
+        sendQuickMessage(`I'm interested in property ${propertyId} at ${propertyAddress}. Can you provide more details?`);
+    }, 500);
+
+    showNotification(`Added ${propertyAddress} to your interests!`);
+}
+
+
+        function contactAboutProperty(propertyId, propertyAddress) {
+            console.log('Contacting about property:', propertyId, propertyAddress);
+            
+            sendQuickMessage(`I'd like to speak with a broker about property ${propertyId} at ${propertyAddress}. Please arrange a call.`);
+            
+            showNotification(`Broker contact requested for ${propertyAddress}`);
+        }
+
+        function composeEmail(email, address, propertyId) {
+            const subject = encodeURIComponent(`Inquiry about Property ${propertyId} - ${address}`);
+            const body = encodeURIComponent(`Dear Team,
+
+I am interested in learning more about the property at ${address} (ID: ${propertyId}).
+
+Could you please provide me with additional details about:
+- Availability and lease terms
+- Additional amenities and features  
+- Viewing schedule
+- Any additional costs or fees
+
+I look forward to hearing from you.
+
+Best regards`);
+            
+            window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+        }
+
+        function callPhone(phone) {
+            const cleanPhone = phone.replace(/[^\d+()-.\s]/g, '');
+            
+            // Validate phone number has enough digits
+            const digitsOnly = cleanPhone.replace(/\D/g, '');
+            
+            if (digitsOnly.length >= 10) {
+                window.open(`tel:${cleanPhone}`, '_self');
+            } else {
+                showNotification('Phone number not available or invalid', true);
+            }
+        }
+
+        // Appointment Modal Functions
+        function openAppointmentModal(data = {}) {
+            const modal = document.getElementById('appointmentModal');
+            modal.classList.add('active');
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDate').min = today;
+            
+            // Load property suggestions
+            loadPropertySuggestions();
+            
+            // Pre-fill data if provided
+            if (data.property_address) {
+                document.getElementById('propertyAddress').value = data.property_address;
+            }
+            if (data.property_id) {
+                document.getElementById('propertyId').value = data.property_id;
+            }
+            
+            // Try to auto-fill user data
+            fillUserData();
+            
+            // Setup property search
+            setupPropertySearch();
+        }
+
+        async function loadPropertySuggestions() {
+            try {
+                const response = await fetch(`${API_BASE}/crm/properties/dropdown`);
+                if (response.ok) {
+                    const data = await response.json();
+                    propertyDropdownData = data.properties || [];
+                    console.log('Loaded', propertyDropdownData.length, 'properties for suggestions');
+                } else {
+                    // Fallback: extract from displayed properties
+                    propertyDropdownData = displayedProperties.map(prop => ({
+                        id: prop.id,
+                        address: prop.address,
+                        display: `${prop.address} - ${prop.size} sq ft`
+                    }));
+                }
+            } catch (error) {
+                console.error('Error loading property suggestions:', error);
+                // Use displayed properties as fallback
+                propertyDropdownData = displayedProperties.map(prop => ({
+                    id: prop.id,
+                    address: prop.address,
+                    display: `${prop.address} - ${prop.size} sq ft`
+                }));
+            }
+        }
+
+        function setupPropertySearch() {
+            const propertyInput = document.getElementById('propertyAddress');
+            const suggestionsDiv = document.getElementById('propertySuggestions');
+            
+            propertyInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                
+                if (query.length < 2) {
+                    suggestionsDiv.classList.remove('show');
+                    return;
+                }
+                
+                const filtered = propertyDropdownData.filter(prop => 
+  (prop.address?.toLowerCase() || '').includes(query.toLowerCase()) ||
+  (prop.display?.toLowerCase() || '').includes(query.toLowerCase())
+);
+
+                if (filtered.length > 0) {
+                    suggestionsDiv.innerHTML = filtered.slice(0, 10).map(prop => 
+                        `<div class="property-suggestion" data-id="${prop.id}" data-address="${prop.address}">
+                            ${prop.display || prop.address}
+                        </div>`
+                    ).join('');
+                    
+                    suggestionsDiv.classList.add('show');
+                    
+                    // Add click handlers
+                    suggestionsDiv.querySelectorAll('.property-suggestion').forEach(item => {
+                        item.addEventListener('click', function() {
+                            propertyInput.value = this.dataset.address;
+                            document.getElementById('propertyId').value = this.dataset.id;
+                            suggestionsDiv.classList.remove('show');
+                        });
+                    });
+                } else {
+                    suggestionsDiv.classList.remove('show');
+                }
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!propertyInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                    suggestionsDiv.classList.remove('show');
+                }
+            });
+        }
+
+        async function fillUserData() {
+            try {
+                const response = await fetch(`${API_BASE}/crm/user/${currentUserId}`);
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    
+                    if (userData.name) {
+                        document.getElementById('customerName').value = userData.name;
+                    }
+                    if (userData.email) {
+                        document.getElementById('customerEmail').value = userData.email;
+                    }
+                    if (userData.phone) {
+                        document.getElementById('customerPhone').value = userData.phone;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        }
+
+        function closeAppointmentModal() {
+            document.getElementById('appointmentModal').classList.remove('active');
+            
+            // Clear form
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerEmail').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('propertyAddress').value = '';
+            document.getElementById('propertyId').value = '';
+            document.getElementById('appointmentDate').value = '';
+            document.getElementById('appointmentTime').value = '';
+            document.getElementById('appointmentNotes').value = '';
+        }
+
+        async function submitAppointment() {
+            const submitButton = document.getElementById('submitAppointmentBtn');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Scheduling...';
+            
+            try {
+                const appointmentData = {
+                    user_id: currentUserId,
+                    customer_name: document.getElementById('customerName').value,
+                    customer_email: document.getElementById('customerEmail').value,
+                    customer_phone: document.getElementById('customerPhone').value || null,
+                    property_address: document.getElementById('propertyAddress').value || null,
+                    property_id: document.getElementById('propertyId').value || null,
+                    appointment_date: document.getElementById('appointmentDate').value,
+                    appointment_time: document.getElementById('appointmentTime').value,
+                    appointment_type: document.getElementById('appointmentType').value,
+                    notes: document.getElementById('appointmentNotes').value || null
+                };
+                
+                // Validate required fields
+                if (!appointmentData.customer_name || !appointmentData.customer_email || !appointmentData.appointment_date || !appointmentData.appointment_time) {
+                    showNotification('Please fill in all required fields', true);
+                    return;
+                }
+                
+                console.log('Submitting appointment:', appointmentData);
+                
+                const response = await fetch(`${API_BASE}/appointments/schedule`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(appointmentData)
+                });
+                
+                const data = await response.json();
+                console.log('Appointment response:', data);
+                
+                if (response.ok && data.success) {
+                    showNotification('Appointment scheduled successfully!');
+                    addMessage(`📅 Appointment scheduled for ${appointmentData.appointment_date} at ${appointmentData.appointment_time}. Confirmation details sent to ${appointmentData.customer_email}.`, false);
+                    closeAppointmentModal();
+                    
+                    // Update user profile
+                    await updateUserProfile(appointmentData);
+                } else {
+                    throw new Error(data.message || data.error || 'Failed to schedule appointment');
+                }
+                
+            } catch (error) {
+                console.error('Error scheduling appointment:', error);
+                showNotification('Error scheduling appointment: ' + error.message, true);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Schedule Appointment';
+            }
+        }
+
+        async function updateUserProfile(appointmentData) {
+            try {
+                const profileUpdate = {
+                    user_id: currentUserId,
+                    name: appointmentData.customer_name,
+                    email: appointmentData.customer_email
+                };
+                
+                if (appointmentData.customer_phone) {
+                    profileUpdate.phone = appointmentData.customer_phone;
+                }
+                
+                const response = await fetch(`${API_BASE}/crm/user/${currentUserId}/update`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(profileUpdate)
+                });
+                
+                if (response.ok) {
+                    console.log('User profile updated successfully');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+            }
+        }
+
+        // Appointments Management Functions
+        async function showAppointmentsModal() {
+            const modal = document.getElementById('appointmentsManagementModal');
+            const content = document.getElementById('appointmentsListContent');
+            
+            modal.classList.add('active');
+            content.innerHTML = '<div class="loading" style="text-align: center; padding: 40px;">Loading your appointments...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/appointments/user/${currentUserId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAppointmentsList(data.appointments || []);
+                } else {
+                    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #718096;">No appointments found.</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #e53e3e;">Error loading appointments.</div>';
+            }
+        }
+
+        function displayAppointmentsList(appointments) {
+            const content = document.getElementById('appointmentsListContent');
+            
+            if (appointments.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #718096;">
+                        <h4>No appointments scheduled</h4>
+                        <p>You haven't scheduled any appointments yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div class="table-container">
+                    <table class="property-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Property</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            appointments.forEach(appointment => {
+                const appointmentDate = new Date(`${appointment.appointment_date}T${appointment.appointment_time || '14:00'}`);
+                const isUpcoming = appointmentDate > new Date();
+                
+                html += `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${appointmentDate.toLocaleDateString()}</div>
+                            <div style="font-size: 12px; color: #718096;">${appointmentDate.toLocaleTimeString()}</div>
+                        </td>
+                        <td>${appointment.property_address || 'Property not specified'}</td>
+                        <td>
+                            <span class="status-badge ${getAppointmentTypeClass(appointment.appointment_type)}">
+                                ${formatAppointmentType(appointment.appointment_type)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${appointment.status || 'scheduled'}">
+                                ${(appointment.status || 'scheduled').charAt(0).toUpperCase() + (appointment.status || 'scheduled').slice(1)}
+                            </span>
+                        </td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                            ${appointment.notes || 'No notes'}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                ${isUpcoming && (appointment.status !== 'completed' && appointment.status !== 'cancelled') ? `
+                                 
+                                    <button class="property-action-btn btn-contact" onclick="cancelAppointment('${appointment.appointment_id}')">
+                                        ❌ Cancel
+                                    </button>
+                                ` : `
+                                    <span style="font-size: 12px; color: #718096;">
+                                        ${appointment.status === 'completed' ? 'Completed' : 
+                                          appointment.status === 'cancelled' ? 'Cancelled' : 'Past appointment'}
+                                    </span>
+                                `}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        function getAppointmentTypeClass(type) {
+            const classes = {
+                'site_visit': 'status-scheduled',
+                'virtual_tour': 'status-pending',
+                'consultation': 'status-confirmed',
+                'maintenance': 'priority-medium',
+                'repair': 'priority-high',
+                'emergency_repair': 'priority-high'
+            };
+            return classes[type] || 'status-scheduled';
+        }
+
+        function formatAppointmentType(type) {
+            const formats = {
+                'site_visit': 'Site Visit',
+                'virtual_tour': 'Virtual Tour',
+                'consultation': 'Consultation',
+                'maintenance': 'Maintenance',
+                'repair': 'Repair',
+                'emergency_repair': 'Emergency Repair'
+            };
+            return formats[type] || type;
+        }
+
+        async function editAppointment(appointmentId) {
+            try {
+                // Get appointment details
+                const response = await fetch(`${API_BASE}/appointments/user/${currentUserId}`);
+                if (!response.ok) throw new Error('Failed to fetch appointments');
+                
+                const data = await response.json();
+                const appointment = data.appointments.find(apt => apt.appointment_id === appointmentId);
+                
+                if (!appointment) {
+                    showNotification('Appointment not found', true);
+                    return;
+                }
+                
+                currentEditingAppointment = appointment;
+                
+                // Populate edit form
+                document.getElementById('editCustomerName').value = appointment.customer_name || '';
+                document.getElementById('editCustomerEmail').value = appointment.customer_email || '';
+                document.getElementById('editCustomerPhone').value = appointment.customer_phone || '';
+                document.getElementById('editPropertyAddress').value = appointment.property_address || '';
+                document.getElementById('editPropertyId').value = appointment.property_id || '';
+                document.getElementById('editAppointmentDate').value = appointment.appointment_date || '';
+                document.getElementById('editAppointmentTime').value = appointment.appointment_time || '';
+                document.getElementById('editAppointmentType').value = appointment.appointment_type || 'site_visit';
+                document.getElementById('editAppointmentNotes').value = appointment.notes || '';
+                
+                // Set minimum date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('editAppointmentDate').min = today;
+                
+                // Close appointments list and open edit modal
+                closeAppointmentsModal();
+                document.getElementById('editAppointmentModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error loading appointment for edit:', error);
+                showNotification('Error loading appointment details', true);
+            }
+        }
+
+        async function updateAppointment() {
+            if (!currentEditingAppointment) {
+                showNotification('No appointment selected for editing', true);
+                return;
+            }
+            
+            const updateButton = document.getElementById('updateAppointmentBtn');
+            updateButton.disabled = true;
+            updateButton.textContent = 'Updating...';
+            
+            try {
+                const updatedData = {
+                    appointment_id: currentEditingAppointment.appointment_id,
+                    user_id: currentUserId,
+                    customer_name: document.getElementById('editCustomerName').value,
+                    customer_email: document.getElementById('editCustomerEmail').value,
+                    customer_phone: document.getElementById('editCustomerPhone').value || null,
+                    property_address: document.getElementById('editPropertyAddress').value || null,
+                    property_id: document.getElementById('editPropertyId').value || null,
+                    appointment_date: document.getElementById('editAppointmentDate').value,
+                    appointment_time: document.getElementById('editAppointmentTime').value,
+                    appointment_type: document.getElementById('editAppointmentType').value,
+                    notes: document.getElementById('editAppointmentNotes').value || null
+                };
+                
+                // Validate required fields
+                if (!updatedData.customer_name || !updatedData.customer_email || !updatedData.appointment_date || !updatedData.appointment_time) {
+                    showNotification('Please fill in all required fields', true);
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}/appointments/${currentEditingAppointment.appointment_id}/update`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Appointment updated successfully!');
+                    addMessage(`📅 Appointment updated for ${updatedData.appointment_date} at ${updatedData.appointment_time}. Updated details sent to ${updatedData.customer_email}.`, false);
+                    closeEditAppointmentModal();
+                    
+                    // Refresh appointments list if it's open
+                    if (document.getElementById('appointmentsManagementModal').classList.contains('active')) {
+                        showAppointmentsModal();
+                    }
+                } else {
+                    throw new Error(data.message || data.error || 'Failed to update appointment');
+                }
+                
+            } catch (error) {
+                console.error('Error updating appointment:', error);
+                showNotification('Error updating appointment: ' + error.message, true);
+            } finally {
+                updateButton.disabled = false;
+                updateButton.textContent = 'Update Appointment';
+            }
+        }
+
+        async function deleteAppointment() {
+            if (!currentEditingAppointment) {
+                showNotification('No appointment selected for deletion', true);
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete this appointment? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/appointments/${currentEditingAppointment.appointment_id}?user_id=${currentUserId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Appointment deleted successfully!');
+                    addMessage(`📅 Appointment deleted successfully. Cancellation notification sent.`, false);
+                    closeEditAppointmentModal();
+                    
+                    // Refresh appointments list if it's open
+                    if (document.getElementById('appointmentsManagementModal').classList.contains('active')) {
+                        showAppointmentsModal();
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to delete appointment');
+                }
+                
+            } catch (error) {
+                console.error('Error deleting appointment:', error);
+                showNotification('Error deleting appointment: ' + error.message, true);
+            }
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/appointments/${appointmentId}?user_id=${currentUserId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showNotification('Appointment cancelled successfully!');
+                    addMessage(`📅 Appointment cancelled successfully.`, false);
+                    
+                    // Refresh the appointments list
+                    showAppointmentsModal();
+                } else {
+                    throw new Error(data.message || 'Failed to cancel appointment');
+                }
+                
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                showNotification('Error cancelling appointment: ' + error.message, true);
+            }
+        }
+
+        function closeAppointmentsModal() {
+            document.getElementById('appointmentsManagementModal').classList.remove('active');
+        }
+
+        function closeEditAppointmentModal() {
+            document.getElementById('editAppointmentModal').classList.remove('active');
+            currentEditingAppointment = null;
+            
+            // Clear form
+            document.getElementById('editCustomerName').value = '';
+            document.getElementById('editCustomerEmail').value = '';
+            document.getElementById('editCustomerPhone').value = '';
+            document.getElementById('editPropertyAddress').value = '';
+            document.getElementById('editPropertyId').value = '';
+            document.getElementById('editAppointmentDate').value = '';
+            document.getElementById('editAppointmentTime').value = '';
+            document.getElementById('editAppointmentNotes').value = '';
+        }
+
+        function scheduleNewAppointment() {
+            closeAppointmentsModal();
+            openAppointmentModal();
+        
+        }
+           
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                let healthMessage = `🏥 System Health Report:\n\n`;
+                healthMessage += `Status: ${data.status}\n`;
+                healthMessage += `Services:\n`;
+                for (const [service, status] of Object.entries(data.services)) {
+                    healthMessage += `• ${service}: ${status}\n`;
+                }
+                
+                if (data.features) {
+                    healthMessage += `\nFeatures:\n`;
+                    data.features.forEach(feature => {
+                        healthMessage += `• ${feature}\n`;
+                    });
+                }
+                
+                addMessage(healthMessage, false);
+                
+            } catch (error) {
+                addMessage('Failed to check system health.', false);
+            }
+        }
+
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('api-status').textContent = `API: ${data.status}`;
+                    
+                    if (data.services.llm === 'active') {
+                        document.getElementById('llm-status').textContent = 'LLM: Active';
+                        document.querySelector('#llm-status').previousElementSibling.className = 'status-dot status-online';
+                    }
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'API: Disconnected';
+                document.querySelector('#api-status').previousElementSibling.className = 'status-dot status-error';
+            }
+        }
+
+        function clearChat() {
+            console.log('Clearing chat...');
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            messagesContainer.innerHTML = `
+                <div class="message bot">
+                    <div class="message-content">
+                        <div>Chat cleared! How can I help you today?</div>
+                        <div class="message-meta">Ready for new conversation • User session maintained</div>
+                    </div>
+                </div>
+            `;
+            
+            messageCount = 0;
+            chatHistory = [];
+            displayedProperties = [];
+            totalPropertiesShown = 0;
+            allAvailableProperties = [];
+            currentPropertyQuery = '';
+            
+            try {
+                sessionStorage.removeItem('chatHistory');
+                console.log('Chat history cleared, user ID preserved');
+            } catch (e) {
+                console.warn('Could not clear chat history:', e);
+            }
+            
+            showNotification('Chat cleared - user session maintained');
+        }
+
+        function saveChatHistory() {
+            try {
+                const chatData = {
+                    messages: chatHistory,
+                    userId: currentUserId,
+                    timestamp: Date.now()
+                };
+                sessionStorage.setItem('chatHistory', JSON.stringify(chatData));
+            } catch (e) {
+                console.warn('Could not save chat history:', e);
+            }
+        }
+
+        function loadChatHistory() {
+            try {
+                const saved = sessionStorage.getItem('chatHistory');
+                if (saved) {
+                    const chatData = JSON.parse(saved);
+                    if (Date.now() - chatData.timestamp < 3600000) { // 1 hour
+                        chatHistory = chatData.messages || [];
+                        
+                        const messagesContainer = document.getElementById('chatMessages');
+                        const welcomeMessage = messagesContainer.querySelector('.message.bot');
+                        
+                        messagesContainer.innerHTML = '';
+                        if (welcomeMessage) {
+                            messagesContainer.appendChild(welcomeMessage);
+                        }
+                        
+                        chatHistory.forEach(msg => {
+                            addMessageToUI(msg.content, msg.isUser, msg.metadata);
+                        });
+                        
+                        console.log('Restored', chatHistory.length, 'messages from session');
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load chat history:', e);
+            }
+        }
+
+        function showTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'block';
+                
+                const messagesContainer = document.getElementById('chatMessages');
+                messagesContainer.appendChild(typingIndicator);
+                
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 100);
+            }
+        }
+
+        function hideTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'none';
+                
+                const chatArea = document.querySelector('.chat-area');
+                const chatInputArea = document.querySelector('.chat-input-area');
+                if (chatArea && chatInputArea) {
+                    chatArea.insertBefore(typingIndicator, chatInputArea);
+                }
+            }
+        }
+
+        function setupTextarea() {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                });
+
+                chatInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        
+                        if (isVoiceMode) {
+                            processVoiceMessage(this.value);
+                        } else {
+                            sendMessage();
+                        }
+                        return false;
+                    }
+                });
+            }
+        }
+
+        function showNotification(message, isError = false, duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            
+            notification.className = 'notification';
+            if (isError) {
+                notification.classList.add('error');
+            }
+            
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, duration);
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up event listeners...');
+            
+            // Error handling
+            window.addEventListener('error', function(e) {
+                console.error('Page error:', e.error);
+                showNotification('An error occurred: ' + e.error.message, true);
+            });
+            
+            // Prevent page unload issues
+            window.addEventListener('beforeunload', function(e) {
+                if (voiceRecognition && isRecording) {
+                    voiceRecognition.stop();
+                }
+                stopAudio();
+            });
+            
+            // Initialize system
+            initializeSystem();
+            
+            console.log('Chat interface initialized successfully');
+        });
+
+        // Handle page visibility changes (for voice cleanup)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (voiceRecognition && isRecording) {
+                    voiceRecognition.stop();
+                }
+                stopAudio();
+            }
+        });
+    </script>
+</body>
+</html>

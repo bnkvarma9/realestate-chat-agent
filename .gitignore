@@ -1,0 +1,20 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Logs and temp
+*.log
+logs/
+uploads/
+data/
+
+# FastAPI unused folders (if you're not serving from them)
+static/
+templates/
+
+# MacOS
+.DS_Store
