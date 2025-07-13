@@ -47,7 +47,7 @@ cp .env.template .env
 
 5. **Initialize the system**
 ```bash
-python main.py
+python3 main.py
 ```
 
 The system will automatically:
