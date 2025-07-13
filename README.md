@@ -346,6 +346,12 @@ Error responses:
     "timestamp": "2024-01-01T12:00:00Z"
 }
 ```
+<img width="1680" height="1050" alt="Screenshot 2025-07-13 at 5 13 42 PM" src="https://github.com/user-attachments/assets/e6d465d8-c951-4a27-be1e-7397d6042ae5" />
+<img width="1680" height="1050" alt="Screenshot 2025-07-13 at 5 13 32 PM" src="https://github.com/user-attachments/assets/185f7e63-2a88-44c1-9b55-2e9ed546af4d" />
+<img width="1680" height="1050" alt="Screenshot 2025-07-13 at 5 13 28 PM" src="https://github.com/user-attachments/assets/5d465895-6b3a-4430-addc-0e42fc738901" />
+<img width="1680" height="1050" alt="Screenshot 2025-07-13 at 5 13 21 PM" src="https://github.com/user-attachments/assets/f330f0a9-de5d-4079-a2d6-7f4110533df4" />
+<img width="1680" height="1050" alt="Screenshot 2025-07-13 at 5 13 17 PM" src="https://github.com/user-attachments/assets/f040489a-d856-4959-9a47-13dfe4c24d1f" />
+<img width="1680" height="1050" alt="Screenshot 2025-07-13 at 5 12 57 PM" src="https://github.com/user-attachments/assets/874c7373-f1df-4f03-a037-1ade776b3427" />
 
 ## 🐛 Troubleshooting
 
